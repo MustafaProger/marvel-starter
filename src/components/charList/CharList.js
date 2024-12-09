@@ -11,7 +11,7 @@ class CharList extends Component {
         loading: true,
         error: false
     }
-    
+
     marvelService = new MarvelService();
 
     componentDidMount() {
@@ -45,6 +45,7 @@ class CharList extends Component {
             
             return (
                 <li 
+                    onClick={() => this.props.onCharSelected(item.id)}
                     className="char__item"
                     key={item.id}>
                         <img src={item.thumbnail} alt={item.name} style={imgStyle}/>
@@ -61,7 +62,6 @@ class CharList extends Component {
     }
 
     render() {
-
         const {charList, loading, error} = this.state;
         
         const items = this.renderItems(charList);
