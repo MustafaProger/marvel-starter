@@ -1,86 +1,119 @@
-import {Component} from 'react';
-import Spinner from '../spinner/Spinner';
-import ErrorMessage from '../errorMessage/ErrorMessage';
-import MarvelService from '../../services/MarvelService';
-import './charList.scss';
+import { Component } from "react";
+import Spinner from "../spinner/Spinner";
+import ErrorMessage from "../errorMessage/ErrorMessage";
+import MarvelService from "../../services/MarvelService";
+import "./charList.scss";
 
 class CharList extends Component {
+	state = {
+		charList: [],
+		loading: true,
+		error: false,
+		newItemLoading: true,
+        offset: 1500,
+        charEnded: false
+	};
 
-    state = {
-        charList: [],
-        loading: true,
-        error: false
+	marvelService = new MarvelService();
+
+	componentDidMount() {
+        this.onRequest();
+	}
+
+	onCharListLoaded = (charList) => {
+
+        let ended = false;
+        if (charList.length < 9 || this.state.offset === 1555) {
+            ended = true
+        }
+
+		this.setState({
+			charList: [...this.state.charList, ...charList],
+			loading: false,
+            newItemLoading: false,
+            offset: this.state.offset + 9,
+            charEnded: ended
+		});
+	};
+
+    onCharListLoading = () => {
+        this.setState({
+            newItemLoading: true
+        })
     }
 
-    marvelService = new MarvelService();
+	onError = () => {
+		this.setState({
+			error: true,
+			loading: false,
+		});
+	};
 
-    componentDidMount() {
-        this.marvelService.getAllCharacters()
+	onRequest = (offset) => {
+
+        this.onCharListLoading()
+
+        this.marvelService
+            .getAllCharacters(offset)
             .then(this.onCharListLoaded)
-            .catch(this.onError)
-    }
+            .catch(this.onError);
+	};
 
-    onCharListLoaded = (charList) => {
-        this.setState({
-            charList,
-            loading: false
-        })
-    }
+	// Этот метод создан для оптимизации,
+	// чтобы не помещать такую конструкцию в метод render
+	renderItems(arr) {
+		const items = arr.map((item) => {
+			let imgStyle = { objectFit: "cover" };
+			if (
+				item.thumbnail ===
+				"http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg"
+			) {
+				imgStyle = { objectFit: "unset" };
+			}
 
-    onError = () => {
-        this.setState({
-            error: true,
-            loading: false
-        })
-    }
+			return (
+				<li
+					onClick={() => this.props.onCharSelected(item.id)}
+					className='char__item'
+					key={item.id}>
+					<img
+						src={item.thumbnail}
+						alt={item.name}
+						style={imgStyle}
+					/>
+					<div className='char__name'>{item.name}</div>
+				</li>
+			);
+		});
+		// А эта конструкция вынесена для центровки спиннера/ошибки
+		return <ul className='char__grid'>{items}</ul>;
+	}
 
-    // Этот метод создан для оптимизации, 
-    // чтобы не помещать такую конструкцию в метод render
-    renderItems(arr) {
-        const items =  arr.map((item) => {
-            let imgStyle = {'objectFit' : 'cover'};
-            if (item.thumbnail === 'http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg') {
-                imgStyle = {'objectFit' : 'unset'};
-            }
-            
-            return (
-                <li 
-                    onClick={() => this.props.onCharSelected(item.id)}
-                    className="char__item"
-                    key={item.id}>
-                        <img src={item.thumbnail} alt={item.name} style={imgStyle}/>
-                        <div className="char__name">{item.name}</div>
-                </li>
-            )
-        });
-        // А эта конструкция вынесена для центровки спиннера/ошибки
-        return (
-            <ul className="char__grid">
-                {items}
-            </ul>
-        )
-    }
+	render() {
+		const { charList, loading, error, newItemLoading, offset, charEnded } = this.state;
 
-    render() {
-        const {charList, loading, error} = this.state;
-        
-        const items = this.renderItems(charList);
+		const items = this.renderItems(charList);
 
-        const errorMessage = error ? <ErrorMessage/> : null;
-        const spinner = loading ? <Spinner/> : null;
-        const content = !(loading || error) ? items : null;
+		const errorMessage = error ? <ErrorMessage /> : null;
+		const spinner = loading ? <Spinner /> : null;
+		const content = !(loading || error) ? items : null;
 
-        return (
-            <div className="char__list">
-                {errorMessage}
-                {spinner}
-                {content}
-                <button className="button button__main button__long">
-                    <div className="inner">load more</div>
-                </button>
-            </div>
-        )
-    }
+		return (
+			<div className='char__list'>
+				{errorMessage}
+				{spinner}
+				{content}
+				<button
+					onClick={() => this.onRequest(offset)}
+                    disabled={newItemLoading}
+                    data-characters-ended={charEnded ? 'none' : 'block'}
+                    style={{display: charEnded ? 'none' : 'block'}}
+					className='button button__main button__long'>
+					<div className='inner'>load more</div>
+				</button>
+			</div>
+		);
+	}
 }
 
 export default CharList;
