@@ -40,6 +40,7 @@ class CharInfo extends Component {
 
 	onCharLoading = () => {
 		this.setState({ loading: true });
+		this.scrollToInpo();
 	};
 
 	updateChar = () => {
@@ -54,6 +55,36 @@ class CharInfo extends Component {
 			.getCharacterById(charId)
 			.then(this.onCharLoaded)
 			.catch(this.onError);		
+	};
+
+	scrollToInpo = () => {
+		const info = document.querySelector(".char__info");
+		if (info) {
+			// Получаем позицию первого элемента
+			const targetPosition =
+			info.getBoundingClientRect().top + window.pageYOffset;
+			const startPosition = window.pageYOffset;
+			const distance = targetPosition - startPosition - 100; // Учитываем отступ 100px для navbar
+			const duration = 1000;
+			let startTime = null;
+
+			const ease = (t, b, c, d) => {
+				t /= d / 2;
+				if (t < 1) return (c / 2) * t * t + b;
+				t--;
+				return (-c / 2) * (t * (t - 2) - 1) + b;
+			};
+
+			const scrollAnimation = (currentTime) => {
+				if (startTime === null) startTime = currentTime;
+				const timeElapsed = currentTime - startTime;
+				const run = ease(timeElapsed, startPosition, distance, duration);
+				window.scrollTo(0, run);
+				if (timeElapsed < duration) requestAnimationFrame(scrollAnimation);
+			};
+
+			requestAnimationFrame(scrollAnimation);
+		}
 	};
 
 	render() {

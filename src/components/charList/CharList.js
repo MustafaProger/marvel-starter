@@ -28,6 +28,7 @@ class CharList extends Component {
 			.getAllCharacters(offset)
 			.then(this.onCharListLoaded)
 			.catch(this.onError);
+		
 	};
 
 	onCharListLoading = () => {
@@ -63,6 +64,7 @@ class CharList extends Component {
 	setRef = (ref) => {
 		this.itemRefs.push(ref);
 	};
+
 
 	focusOnItem = (id) => {
 		// Я реализовал вариант чуть сложнее, и с классом и с фокусом
