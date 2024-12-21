@@ -38,7 +38,9 @@
         }
     }
     &__static {
-        padding: 40px 35px;
+        height: 100%;
+        width: 100%;
+        padding: 30px;
         background-color: $dark;
         position: relative;
         button {
