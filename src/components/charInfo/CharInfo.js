@@ -7,62 +7,57 @@ import Spinner from "../spinner/Spinner";
 import ErrorMessage from "../errorMessage/ErrorMessage";
 import Skeleton from "../skeleton/Skeleton";
 
-import { Component } from "react";
+import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import MarvelService from "../../services/MarvelService";
 
-class CharInfo extends Component {
-	state = {
-		char: null,
-		loading: false,
-		error: false,
+const CharInfo = (props) => {
+	const [char, setChar] = useState(null);
+	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState(false);
+
+	const marvelService = new MarvelService();
+
+	useEffect(() => {
+		updateChar();
+	}, []);
+
+	useEffect(() => {
+		updateChar();
+	}, [props.charId]);
+
+	const onCharLoaded = (char) => {
+		setChar((prevChar) => char);
+		setLoading(false);
 	};
 
-	marvelService = new MarvelService();
-
-	componentDidMount() {
-		this.updateChar();
-	}
-
-	componentDidUpdate(prevProps, prevState) {
-		if (this.props.charId !== prevProps.charId) {
-			this.updateChar();
-		}
-	}
-
-	onCharLoaded = (char) => {
-		this.setState({ char, loading: false });
+	const onError = () => {
+		setLoading(false);
+		setError(true);
 	};
 
-	onError = () => {
-		this.setState({ loading: false, error: true });
+	const onCharLoading = () => {
+		setLoading(true);
+		scrollToInpo();
 	};
 
-	onCharLoading = () => {
-		this.setState({ loading: true });
-		this.scrollToInpo();
-	};
-
-	updateChar = () => {
-		const { charId } = this.props;
+	const updateChar = () => {
+		const { charId } = props;
 		if (!charId) {
 			return;
 		}
 
-		this.onCharLoading();
+		onCharLoading();
 
-		this.marvelService
-			.getCharacterById(charId)
-			.then(this.onCharLoaded)
-			.catch(this.onError);		
+		marvelService.getCharacterById(charId).then(onCharLoaded).catch(onError);
 	};
 
-	scrollToInpo = () => {
+	const scrollToInpo = () => {
 		const info = document.querySelector(".char__info");
 		if (info) {
 			// Получаем позицию первого элемента
 			const targetPosition =
-			info.getBoundingClientRect().top + window.pageYOffset;
+				info.getBoundingClientRect().top + window.pageYOffset;
 			const startPosition = window.pageYOffset;
 			const distance = targetPosition - startPosition - 100; // Учитываем отступ 100px для navbar
 			const duration = 1000;
@@ -87,31 +82,30 @@ class CharInfo extends Component {
 		}
 	};
 
-	render() {
-		const { char, loading, error } = this.state;
+	const skeleton = char || loading || error ? null : <Skeleton />;
+	const errorMessage = error ? <ErrorMessage /> : null;
+	const spinner = loading ? <Spinner /> : null;
+	const content = !(loading || error || !char) ? <View char={char} /> : null;
 
-		const skeleton = char || loading || error ? null : <Skeleton />;
-		const errorMessage = error ? <ErrorMessage /> : null;
-		const spinner = loading ? <Spinner /> : null;
-		const content = !(loading || error || !char) ? <View char={char} /> : null;
-
-		return (
-			<div className='char__info'>
-				{skeleton}
-				{errorMessage}
-				{spinner}
-				{content}
-			</div>
-		);
-	}
-}
+	return (
+		<div className='char__info'>
+			{skeleton}
+			{errorMessage}
+			{spinner}
+			{content}
+		</div>
+	);
+};
 
 const View = ({ char }) => {
 	const { name, description, thumbnail, homepage, wiki, comics } = char;
 
-	let imgStyle = {'objectFit' : 'cover'};
-	if (thumbnail === 'http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg') {
-	    imgStyle = {'objectFit' : 'unset'};
+	let imgStyle = { objectFit: "cover" };
+	if (
+		thumbnail ===
+		"http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg"
+	) {
+		imgStyle = { objectFit: "unset" };
 	}
 
 	const charDescr =
@@ -141,7 +135,7 @@ const View = ({ char }) => {
 				<img
 					src={thumbnail}
 					alt='Image character'
-                    style={imgStyle}
+					style={imgStyle}
 				/>
 				<div>
 					<div className='char__info-name'>{name}</div>
@@ -168,6 +162,6 @@ const View = ({ char }) => {
 
 CharInfo.propTypes = {
 	charId: PropTypes.number,
-}
+};
 
 export default CharInfo;
