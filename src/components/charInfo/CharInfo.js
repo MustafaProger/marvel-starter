@@ -9,14 +9,12 @@ import Skeleton from "../skeleton/Skeleton";
 
 import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
-import MarvelService from "../../services/MarvelService";
+import useMarvelService from "../../services/MarvelService";
 
 const CharInfo = (props) => {
 	const [char, setChar] = useState(null);
-	const [loading, setLoading] = useState(false);
-	const [error, setError] = useState(false);
 
-	const marvelService = new MarvelService();
+	const { loading, error, getCharacterById, clearError } = useMarvelService();
 
 	useEffect(() => {
 		updateChar();
@@ -28,28 +26,21 @@ const CharInfo = (props) => {
 
 	const onCharLoaded = (char) => {
 		setChar((prevChar) => char);
-		setLoading(false);
-	};
-
-	const onError = () => {
-		setLoading(false);
-		setError(true);
 	};
 
 	const onCharLoading = () => {
-		setLoading(true);
 		scrollToInpo();
 	};
 
 	const updateChar = () => {
+		clearError();
+
 		const { charId } = props;
 		if (!charId) {
 			return;
 		}
 
-		onCharLoading();
-
-		marvelService.getCharacterById(charId).then(onCharLoaded).catch(onError);
+		getCharacterById(charId).then(onCharLoaded);
 	};
 
 	const scrollToInpo = () => {
