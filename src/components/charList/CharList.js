@@ -19,7 +19,7 @@ const CharList = (props) => {
 	}, []);
 
 	const onRequest = (offset, initial) => {
-		// initial ? setNewItemLoading(false) : setNewItemLoading(true);
+		initial ? setNewItemLoading(false) : setNewItemLoading(true);
 		getAllCharacters(offset).then(onCharListLoaded);
 	};
 
@@ -108,7 +108,7 @@ const CharList = (props) => {
 				disabled={newItemLoading}
 				style={{ display: charEnded ? "none" : "block" }}
 				onClick={() => onRequest(offset)}>
-				<div className='inner'>load more</div>
+				<div className='inner'>{loading ? "Loading..." : "Load More"}</div>
 			</button>
 		</div>
 	);
