@@ -7,6 +7,9 @@
         position: relative;
         z-index: 5;
         background-color: #fff;
+        position: sticky;
+        top: 20px;
+        left: 0;
         &-name {
             font-weight: bold;
             font-size: 22px;
