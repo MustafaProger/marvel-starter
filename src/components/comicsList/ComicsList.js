@@ -1,5 +1,6 @@
 
 import { useCallback, useEffect, useState } from "react";
+import { Link } from "react-router";
 
 import useMarvelService from "../../services/MarvelService";
 import Spinner from "../spinner/Spinner";
@@ -10,11 +11,11 @@ const ComicsList = () => {
 	const [comics, setComics] = useState([]);
 	const [offset, setOffset] = useState(210);
 	const [initialItemsLoading, setInitialItemsLoading] = useState(true);
-	const { loading, getComics } = useMarvelService();
+	const { loading, getAllComics } = useMarvelService();
 
 	const accessingApi = useCallback(async () => {
 		try {
-			const comics = await getComics(offset);
+			const comics = await getAllComics(offset);
 			setComics((prevComics) => [...prevComics, ...comics]);
 			setInitialItemsLoading(false);
 		} catch (error) {
@@ -34,11 +35,11 @@ const ComicsList = () => {
 		<div className='comics__list'>
 			{initialItemsLoading ? <Spinner /> : null}
 			<ul className='comics__grid'>
-				{comics.map((comic) => (
+				{comics.map((comic, i) => (
 					<li
 						className='comics__item'
-						key={comic.id}>
-						<a href='#'>
+						key={comic.id + i}>
+						<Link to={`/comics/${comic.id}`}>
 							<img
 								src={`${comic.thumbnail.path}.${comic.thumbnail.extension}`}
 								alt={comic.title}
@@ -50,7 +51,7 @@ const ComicsList = () => {
 									? `${comic.prices[0].price}$`
 									: "NOT AVAILABLE"}
 							</div>
-						</a>
+						</Link>
 					</li>
 				))}
 			</ul>
